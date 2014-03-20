@@ -160,6 +160,7 @@ public:
         if (ParseEquity(inputString, tmp)) {
             return EquityPtr(new Equity( tmp ));
         }
+        return EquityPtr();
     }
 
 private:
@@ -212,12 +213,17 @@ private:
         result._Description = splitter[ F_Description ];
 
         // Parse the MarketCap field:
-
         if (! ParseString( splitter[ F_MarketCap ], result._MarketCap )) {
             printBadRecordMsg();
             return false;
         }
 
+        // Parse the Price field:
+        if (! ParseString( splitter[ F_Price ], result._Price )) {
+            printBadRecordMsg();
+            return false;
+        }
+        
         // Parse the PE_ratio field:
         if (! ParseString( splitter[ F_PE_ratio ], result._PE_ratio )) {
             printBadRecordMsg();
