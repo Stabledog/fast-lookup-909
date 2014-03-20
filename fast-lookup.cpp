@@ -95,6 +95,12 @@ struct Stub  {
 
 typedef shared_ptr<Equity> EquityPtr;
 
+// Base class for Equity filters.
+struct EquityFilter {
+    virtual const Equity& Compare(const Equity& left, const Equity& right) const {
+        return left;
+    }
+};
 
 
 // The EquityMap class is an associative array which provides a fast-lookup container
@@ -127,6 +133,28 @@ public:
             throw new std::domain_error("No such equity name");
         }
         return it->second;
+    }
+
+    // Iteratively compares each element in the collection using a caller-supplied
+    // comparison filter.  Returns the element which the filter determines to be
+    // best-fit:
+    EquityPtr FindByCompareFilter( const EquityFilter& filter) const {
+        // Our initial first-item is the first item in the collection.
+        if ( _Map.size()== 0)
+            return EquityPtr();
+        // In a 1-element collection, the compare filter is irrelevant:
+        if (_Map.size()==1)
+            return _Map.begin()->second;
+
+        EquityPtr cur=_Map.begin()->second;
+        for (const_iterator it= ++begin(); it !=end(); ++it) {
+            const Equity& selected = filter.Compare(*cur, *it->second);
+            if ( &selected != &*cur )
+                // The filter chose the right-side equity:
+                cur=it->second;
+
+        }
+        return cur;
     }
 
 private:
@@ -376,6 +404,26 @@ public:
     }
 };
 
+
+// Compares two Equity objects, returning the one with the lowest P/E.  If
+// the objects have the same P/E, it returns the one with the lowest price.
+class LowestPE_filter : public EquityFilter{
+    const Equity& Compare(const Equity& left, const Equity& right) const {
+        double l_pe=left.GetPE_ratio(),
+               r_pe=right.GetPE_ratio();
+        if (l_pe < r_pe)
+            return left;
+        if (r_pe < l_pe)
+            return right;
+        // Fall-through: the P/E ratios are equal, so return the one
+        // with the lowest price:
+        if ( left.GetPrice() < right.GetPrice() ) {
+            return left;
+        }
+        return right;
+    }
+};
+
 // EquityService owns the EquityMap and provides application-level query
 // interfaces.
 //
@@ -409,7 +457,7 @@ public:
     }
 
     // Returns all security names, ordered alphabetically:
-    std::string allSecurityCodes() const {
+    string allSecurityCodes() const {
 
         // Our Map stores its elements indexed by equity name, and the
         // underlying comparison operator uses the std::string operator '<'.
@@ -423,6 +471,15 @@ public:
             ++it;
         }
         return ss.str();
+    }
+
+    // Returns the name of the security with the lowest P/E ratio:
+    string lowestPE() const {
+        const EquityPtr result=_Map.FindByCompareFilter(  LowestPE_filter() );
+        if (result) {
+           return result->GetEquityName();
+        }
+        return "";
     }
 
 private:
@@ -475,6 +532,11 @@ public:
             if (sp.size() != input000_record_count)
                 throw std::runtime_error("Invalid record count for allSecurityCodes()");
         
+        }
+        {
+            // Find the lowest P/E:
+            string lowestPe=srv.lowestPE();
+            Stub() << "Lowest P/E:" << lowestPe << std::endl;
         }
 
     }
