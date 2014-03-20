@@ -81,6 +81,18 @@ private:
 
 };
 
+// Stub is a diagnostic aid, printing to stderr:
+struct Stub  {
+    std::ostream& operator << (const char* msg) {
+        std::cerr << msg;
+        return std::cerr;
+    }
+    std::ostream& operator << (const string& msg) {
+        std::cerr << msg;
+        return std::cerr;
+    }
+};
+
 typedef shared_ptr<Equity> EquityPtr;
 
 // We compare Equity instances by comparing their symbol/name, as the primary key:
@@ -155,13 +167,32 @@ public:
 
 };
 
+// Trim leading whitespace from a string.  
+//   Usage:
+//      string newStr =  LTrim(old_string);
+//
+struct LTrim {
+    LTrim(const string& orig) {
+        size_t ix=orig.find_first_not_of(" \t\n\r\b");
+        if (ix==string::npos) 
+            _Result=orig;
+        else
+            _Result=orig.substr(ix);
+        
+    }
+    string _Result;
+    operator const string&() const {
+        return _Result;
+    }
+};
 
 // ParseString offers a few conversion functions which return false if
 // 'input' doesn't validate for the 'target' type.  Otherwise, the string
 // is converted and target is updated.
 class ParseString {
 public:
-    ParseString(const string& input, long long& target) : _Ok(false) {
+    ParseString(const string& xinput, long long& target) : _Ok(false) {
+        string input = LTrim( xinput );
         // Make sure we only have 0-9 in the input:
         if (input.find_first_not_of("0123456789") != std::string::npos) {
             return;  //   Oops.  One or more non-digits!
@@ -175,7 +206,8 @@ public:
         _Ok=true;  // We're happy now.
     }
 
-    ParseString(const string& input, double & target) : _Ok(false) {
+    ParseString(const string& xinput, double & target) : _Ok(false) {
+        string input = LTrim( xinput );
         // Make sure we only have 0-9 or '.' in the input:
         if (input.find_first_not_of("0123456789.") != std::string::npos) {
             return;  //   Oops.  One or more invalid chars!
@@ -240,8 +272,9 @@ public:
 private:
 
 
-    void printBadRecordMsg() const {
-        cout << "Not found";
+    void printBadRecordMsg(const string& context) const {
+        cout << "Not found\n";
+        Stub() << "Failed at " << context << std::endl;
     }
 
     // Validates the EquityName against business rules: it must conform to:
@@ -277,13 +310,13 @@ private:
 
         // Sanity-check the number of tokens:
         if ( splitter.size() != (size_t)F_COUNT ) {
-            printBadRecordMsg();
+            printBadRecordMsg(inputString);
             return false;
         }
 
         // The EquityName field requires validation:
         if (! parse_EquityName( splitter[ F_EquityName ], result._EquityName )) {
-            printBadRecordMsg();
+            printBadRecordMsg(inputString);
             return false;
         }
 
@@ -293,19 +326,19 @@ private:
 
         // Parse the MarketCap field:
         if (! ParseString( splitter[ F_MarketCap ], result._MarketCap )) {
-            printBadRecordMsg();
+            printBadRecordMsg(inputString);
             return false;
         }
 
         // Parse the Price field:
         if (! ParseString( splitter[ F_Price ], result._Price )) {
-            printBadRecordMsg();
+            printBadRecordMsg(inputString);
             return false;
         }
 
         // Parse the PE_ratio field:
         if (! ParseString( splitter[ F_PE_ratio ], result._PE_ratio )) {
-            printBadRecordMsg();
+            printBadRecordMsg(inputString);
             return false;
         }
         return true;
@@ -323,8 +356,13 @@ public:
 
         EquityTextFactory fact;
 
+        string header;
+        if (!std::getline(input,header)) {
+            throw std::runtime_error("No header line in input");
+        }
         // Loop the input stream until end-of-file:
         string line;
+
         while ( std::getline(input, line) ) {
             EquityPtr newEquity=fact.ParseEquity( line.c_str() );
             if (!newEquity) {
@@ -335,6 +373,8 @@ public:
 
             // Save our new Equity object in the caller's collection:
             output.Insert(*newEquity);
+
+            Stub() << "Inserted " << newEquity->GetEquityName() << std::endl;
         }
 
     }
