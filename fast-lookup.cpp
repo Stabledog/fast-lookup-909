@@ -19,14 +19,14 @@ using std::tr1::shared_ptr;
 class Equity {
 
 public:
-    // Construct an Equity from its component parts: 
+    // Construct an Equity from its component parts:
     Equity(
-          const char* equityName,  //  Name/symbol
-          const char* description, //  Plain-text description
-          long long   marketCap,   //  Market capitalization, USD$
-          double      price,       //  Price, US$
-          double      PE_ratio     //  P/E ratio
-         ) : 
+        const char* equityName,  //  Name/symbol
+        const char* description, //  Plain-text description
+        long long   marketCap,   //  Market capitalization, USD$
+        double      price,       //  Price, US$
+        double      PE_ratio     //  P/E ratio
+    ) :
         _EquityName(equityName),
         _Description(description),
         _MarketCap(marketCap),
@@ -35,17 +35,17 @@ public:
     }
 
     // Default constructor zeroes out the POD fields only:
-    Equity() : 
+    Equity() :
         _MarketCap(0),
         _Price(0),
         _PE_ratio(0) {
-        }
+    }
 
     // Returns the equity name/symbol:
     const string & GetEquityName() const {
         return _EquityName;
     }
-    
+
     // Returns a plain-text description of the equity:
     const string & GetDescription() const {
         return _Description;
@@ -55,7 +55,7 @@ public:
     long long GetMarketCap() const {
         return _MarketCap;
     }
-    
+
     // Returns the current price of this equity in USD$:
     double GetPrice() const {
         return _Price;
@@ -67,12 +67,12 @@ public:
     }
 
 private:
-    string      _EquityName;    
+    string      _EquityName;
     string      _Description;
     long long   _MarketCap;
     double      _Price;
     double      _PE_ratio;
-    
+
     friend class EquityTextFactory;
 
 };
@@ -137,13 +137,13 @@ private:
 
 //  Prints an Equity object to a stream:
 std::ostream& operator << (std::ostream& output, const Equity& val) {
-    output 
-        << "code: " << val.GetEquityName() 
-        << " description: " << val.GetDescription() 
-        << " last price: " << val.GetPrice() 
-        << " market cap: " << val.GetMarketCap()  << " Million "
-        << " P/E: " << val.GetPE_ratio()
-        ;
+    output
+            << "code: " << val.GetEquityName()
+            << " description: " << val.GetDescription()
+            << " last price: " << val.GetPrice()
+            << " market cap: " << val.GetMarketCap()  << " Million "
+            << " P/E: " << val.GetPE_ratio()
+            ;
 }
 
 
@@ -192,11 +192,11 @@ private:
             return false;
         }
 
-        if ( 
-               (rawField.size() < 1) ||   // Bounds-check the length.
-               ( rawField.size() > EquityName_MaxLen )
-           )
-            return false; 
+        if (
+            (rawField.size() < 1) ||   // Bounds-check the length.
+            ( rawField.size() > EquityName_MaxLen )
+        )
+            return false;
 
         // Having passed validation, now we can assign the result:
         target=rawField;
@@ -238,7 +238,7 @@ private:
             printBadRecordMsg();
             return false;
         }
-        
+
         // Parse the PE_ratio field:
         if (! ParseString( splitter[ F_PE_ratio ], result._PE_ratio )) {
             printBadRecordMsg();
@@ -269,15 +269,15 @@ class ParseArgs {
 public:
     ParseArgs(int argc, char* argv[]) :
         RunUnitTests(false) {
-            for (int i = 1; i < argc ; ++i) {
-                if ( match(argv[i], "-t" )) {
-                    RunUnitTests=true;
-                }
-                else {
-                    std::cerr << "Unknown argument: " << argv[i] << std::endl;
-                }
+        for (int i = 1; i < argc ; ++i) {
+            if ( match(argv[i], "-t" )) {
+                RunUnitTests=true;
+            }
+            else {
+                std::cerr << "Unknown argument: " << argv[i] << std::endl;
             }
         }
+    }
 
     bool RunUnitTests;
     bool match( const char* left, const char* right) const {
@@ -290,14 +290,14 @@ public:
 
 int main(int argc, char* argv[]) {
     // main() is our test driver:
-    //  
+    //
     //  Args:  -t:  Run unit tests.
     //
-    
+
     ParseArgs args(argc,argv);
 
     if ( args.RunUnitTests ) {
         test_EquityParser test_00;
     }
-    
+
 }
