@@ -1,0 +1,17 @@
+#!/bin/bash
+
+
+function errExit {
+    echo "ERROR: $@" >&2
+    exit 1
+}
+
+while true; do
+    make || errExit "Make failed"
+
+    echo "Invoking cgdb:"
+    /usr/bin/cgdb -- ./fast-lookup -ex 'b main' -ex 'r  -t'
+
+    read -p "Hit any key to restart test loop, or Ctrl+C to exit:"
+
+done

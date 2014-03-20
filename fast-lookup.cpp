@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <tr1/memory>
 #include <cstring>
@@ -37,7 +38,7 @@ public:
     }
 
     // Default constructor zeroes out the POD fields only:
-    Equity(const char* equityName=NULL) :
+    Equity(const char* equityName="") :
         _EquityName(equityName),
         _MarketCap(0),
         _Price(0),
@@ -136,12 +137,20 @@ private:
 // with the resulting tokens:
 class StringSplitter : public std::vector<string> {
 public:
-    StringSplitter(const char* text, char delimiter) {
-        std::stringstream ss(text);
+    void Insert( std::stringstream& ss, char delimiter ) {
         string cur;
         while (std::getline(ss,cur,delimiter)) {
             this->push_back(cur);
         }
+    }
+    StringSplitter(const char* text, char delimiter) {
+        std::stringstream ss(text);
+        Insert(ss , delimiter);
+    }
+
+    StringSplitter(const std::string& text, char delimiter) {
+        std::stringstream ss(text);
+        Insert( ss , delimiter);
     }
 
 };
@@ -195,8 +204,9 @@ std::ostream& operator << (std::ostream& output, const Equity& val) {
     output
             << "code: " << val.GetEquityName()
             << " description: " << val.GetDescription()
+            << std::fixed << std::setprecision(3)
             << " last price: " << val.GetPrice()
-            << " market cap: " << std::fixed << std::setprecision(3) << cap << " Million "
+            << " market cap: " << cap << " Million "
             << " P/E: " << val.GetPE_ratio()
             ;
 }
@@ -314,26 +324,17 @@ public:
         EquityTextFactory fact;
 
         // Loop the input stream until end-of-file:
-        while ( ! input.eofbit ) {
-            string line;
-
-            // Read a line of input:
-            std::getline( input , line );
-            if ( input.failbit || input.badbit ) {
-                throw new std::runtime_error("Input stream failure");
-            }
-
-            Equity newEquity;
-            // Parse this record:
-            if (! fact.ParseEquity( line.c_str() )) {
+        string line;
+        while ( std::getline(input, line) ) {
+            EquityPtr newEquity=fact.ParseEquity( line.c_str() );
+            if (!newEquity) {
                 // If parse failed, keep going...
                 continue;
 
             }
 
             // Save our new Equity object in the caller's collection:
-            output.Insert(newEquity);
-
+            output.Insert(*newEquity);
         }
 
     }
@@ -348,9 +349,9 @@ public:
     }
 
     // initialize() loads all security data from stdin, filling _Map:
-    void initialize() {
+    void initialize(std::istream& input=std::cin) {
         try {
-            EquityLoader( std::cin, _Map);
+            EquityLoader( input, _Map);
         }
         catch (...) {
             std::cerr << "EquityService.initialize() failed" << std::endl;
@@ -376,12 +377,14 @@ public:
 
         // Our Map stores its elements indexed by equity name, and the
         // underlying comparison operator uses the std::string operator '<'.
-        // So all we have to do is build a string with each equity name:
+        // So all we have to do is build a string with one equity name per
+        // line.
 
         std::stringstream ss;
         EquityMap::const_iterator it=_Map.begin();
         while (it != _Map.end()) {
-            ss << it->GetEquityName() << " ";
+            ss << it->GetEquityName() << "\n";
+            ++it;
         }
         return ss.str();
     }
@@ -391,17 +394,53 @@ private:
 };
 
 
-//#define _COMPILE_UNIT_TESTS
+#define _COMPILE_UNIT_TESTS
 #ifdef _COMPILE_UNIT_TESTS
 
 class test_EquityParser {
 public:
     test_EquityParser() {
         EquityTextFactory fact_00;
-        {
-            EquityTextFactory::EquityPtr ptr=fact_00.ParseEquity("IBMUS|International Business Machines|198657057012|182.95|11.18");
+        try {
+            EquityPtr ptr=fact_00.ParseEquity("IBMUS|International Business Machines|198657057012|182.95|11.18");
             std::cerr <<  *ptr << std::endl;
         }
+        catch (std::exception e) {
+            std::cerr << e.what() << std::endl;
+        }
+    }
+};
+
+class test_EquityService {
+public:
+    test_EquityService() {
+        EquityService srv;
+
+        // Test loading the EquityService with a known data stream:
+        std::ifstream test_input("test_cases/input000.txt");
+        if (! test_input.is_open()) {
+            throw std::runtime_error("Can't open input000.txt");
+        }
+        const int input000_record_count=17;
+        srv.initialize(test_input); 
+
+        {
+            // Make sure we can retrieve a security:
+            EquityPtr p=srv.getSecurityInfo("MSFTUS");
+            if ( !p || (p->GetEquityName() != "MSFTUS" ))
+                throw std::runtime_error("Can't find MSFTUS");
+        }
+
+        {
+            // Verify that we can retrieve all security codes:
+            string allCodes=srv.allSecurityCodes();
+            // How many records did we get?
+            StringSplitter sp( allCodes, '\n');
+            if (sp.size() != input000_record_count)
+                throw std::runtime_error("Invalid record count for allSecurityCodes()");
+        
+        }
+
     }
 };
 
@@ -442,6 +481,7 @@ int main(int argc, char* argv[]) {
 #ifdef _COMPILE_UNIT_TESTS
     if ( args.RunUnitTests ) {
         test_EquityParser test_00;
+        test_EquityService test_01;
     }
 #endif
 

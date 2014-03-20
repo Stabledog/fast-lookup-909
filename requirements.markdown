@@ -3,18 +3,12 @@ pwd: de4f2d3a
 les.matheson@gmail.com
 
 
-Line: 1 Col: 1
-Equity - Fast Lookup Service
- 1d 23:52:27
- 0/1 Attempted
- les.matheson@gmail.com
 
-    1 
+# Equity - Fast Lookup Service
+------------------------------
 
-Fast Lookup Service (Programming)
-
-Introduction and review criteria
-
+## Introduction and review criteria
+-----------------------------------
  
 
 Your code will be the starting point for a service in a n-tiered architecture. The role of this service is to provide access to equity security attributes and fields. Callers will give an equity code (defined below) and the service will provide access to the attributes of the security. When coding, consider all aspects that will keep your code robust, scalable, and maintainable.
@@ -23,40 +17,44 @@ The code you create in your assignment will include the following components des
 
  
 
-Equity C++ class:
 
- 
+## Equity C++ class:
+--------------------
 
     Contains equity security attributes such as name, description, current price, market cap, P/E, etc.
     These are just what are considered to be the main summary attributes of the equity security, and, by design, they are expected to be no bigger than 1KB. (For this assignment, they can be much smaller, with just a couple of strings and doubles.)
 
  
 
-EquityService C++ class:
 
- 
+## EquityService C++ class:
+---------------------------
 
     For performance reasons this service caches all data in memory. It’s designed to handle 100,000 securities with room to grow in the future to handle 500,000, if needed, while still keeping all information in memory.
-    Implement the method “initialize” that gets securities and their attributes from STDIN. The service will hold on to these data by means of the EquityMap class.
-    Implement the method “getSecurityInfo”: It will take an equity code and return the security attributes. Examples of equity codes: “IBMUS”, “AAPLUS”, “AALLN”, “30HK”, etc. Keys have at most 6 characters, and are composed of uppercase letters (ASCII only) or the digits 0-9. The method returns an object of the Equity class.
-    Implement the method “allSecurityCodes” that returns all security codes in alphabetical order.
-    Implement the method “lowestPE” that returns the security code of the security with the lowest P/E. If two or more securities have the same P/E exactly, return the one of them with the lowest price.
-    Implement the method "getPRRange(min_pe, max_pe)" that returns all objects whose P/E is between min_pe and max_pe. The returned entries should be in alphabetical order of equity code.
+
+    * Implement the method “initialize” that gets securities and their attributes from STDIN. The service will hold on to these data by means of the EquityMap class.
+
+    * Implement the method “getSecurityInfo”: It will take an equity code and return the security attributes. Examples of equity codes: “IBMUS”, “AAPLUS”, “AALLN”, “30HK”, etc. Keys have at most 6 characters, and are composed of uppercase letters (ASCII only) or the digits 0-9. The method returns an object of the Equity class.
+
+    * Implement the method “allSecurityCodes” that returns all security codes in alphabetical order.
+
+    * Implement the method “lowestPE” that returns the security code of the security with the lowest P/E. If two or more securities have the same P/E exactly, return the one of them with the lowest price.
+
+    * Implement the method "getPRRange(min_pe, max_pe)" that returns all objects whose P/E is between min_pe and max_pe. The returned entries should be in alphabetical order of equity code.
+
     Note that none of these methods print out values, they just pass back their results through their return values.
 
  
 
-EquityMap C++ class:
-
- 
+## EquityMap C++ class:
+------------------------
 
     Design this class optimized for fast access to each one of potentially thousands of different companies--each identified by its equity code.
 
- 
 
-Definition of Provided Input
 
- 
+## Definition of Provided Input
+--------------------------------
 
     For this exercise, input file is from STDIN and is delimited and has the following format: Code | Description | Market Cap | Price | P/E Ratio
     If there is any data error from input file, the line should be skipped and you should print "Input invalid".
@@ -64,21 +62,21 @@ Definition of Provided Input
  
 
 main() function testing harness will consistent of these steps:
+---------------------------------------------------------------
+
+    * Parse the input into a several instances of the Equity class, and pass them to EquityService::initialize(), input file is '|' delimited and has the following format: Code | Description | Market Cap | Price | P/E Ratio
+    
+    * Call EquityService:: getSecurityInfo for “IBMUS”, “AAPLUS”, “AALLN”, and “30HK” and print out each returned object.
+    * Call EquityService:: allSecurityCodes and print out those codes
+    * Call EquityService:: lowestPE and print out that code
+    * Call EquityService::getPERange() to print out all objects whose P/E is between 6 and 15
 
  
 
-    Parse the input into a several instances of the Equity class, and pass them to EquityService::initialize(), input file is '|' delimited and has the following format: Code | Description | Market Cap | Price | P/E Ratio
-    Call EquityService:: getSecurityInfo for “IBMUS”, “AAPLUS”, “AALLN”, and “30HK” and print out each returned object.
-    Call EquityService:: allSecurityCodes and print out those codes
-    Call EquityService:: lowestPE and print out that code
-    Call EquityService::getPERange() to print out all objects whose P/E is between 6 and 15
-
  
 
- 
-
-Error Checking
-
+## Error Checking
+-----------------
  
 
     Your code should have error checking. When there is no record found for the passed input code, your code should simply print "Not found".
@@ -87,10 +85,8 @@ Error Checking
 
  
 
- 
-
 Sample Input:
-
+-------------
  
 
 HEADER:Code|Description|Market Cap|Price|P/E Ratio
@@ -115,7 +111,7 @@ PFEUS|PFIZER INC|204834242560|31.879999|14.0878
  
 
 Sample Output:
-
+--------------
  
 
 Lookup for Code IBMUS
@@ -159,31 +155,5 @@ code: WMTUS description: WAL-MART STORES last price: 75.330 market cap: 241582.7
 code: XOMUS description: EXXON MOBIL CORP last price: 94.070 market cap: 413785.620 Million  P/E: 12.830
 
  
-YOUR ANSWER
-Download sample testcasesOn windows, do not use notepad to open the files.
-1
-
-#include <iostream>
-
-2
-
-using namespace std;
-
-3
-
-int main() {
-
-4
-
-    /* Enter your code here. Read input from STDIN. Print output to STDOUT */
-
-5
-
-    return 0;
-
-6
-
-}
-
 
 

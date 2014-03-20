@@ -1,3 +1,75 @@
 fast-lookup
 *.o
 *.orig
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Equity	fast-lookup.cpp	/^    Equity($/;"	f	class:Equity
+Equity	fast-lookup.cpp	/^    Equity(const char* equityName=NULL) :$/;"	f	class:Equity
+Equity	fast-lookup.cpp	/^class Equity {$/;"	c	file:
+EquityLoader	fast-lookup.cpp	/^    EquityLoader( std::istream& input, EquityMap& output ) {$/;"	f	class:EquityLoader
+EquityLoader	fast-lookup.cpp	/^class EquityLoader {$/;"	c	file:
+EquityMap	fast-lookup.cpp	/^    EquityMap() {$/;"	f	class:EquityMap
+EquityMap	fast-lookup.cpp	/^class EquityMap {$/;"	c	file:
+EquityPtr	fast-lookup.cpp	/^typedef shared_ptr<Equity> EquityPtr;$/;"	t	file:
+EquityService	fast-lookup.cpp	/^    EquityService() {$/;"	f	class:EquityService
+EquityService	fast-lookup.cpp	/^class EquityService {$/;"	c	file:
+EquityTextFactory	fast-lookup.cpp	/^class EquityTextFactory {$/;"	c	file:
+F_COUNT	fast-lookup.cpp	/^    enum { F_EquityName=0, F_Description, F_MarketCap, F_Price, F_PE_ratio, F_COUNT };$/;"	e	enum:EquityTextFactory::__anon1	file:
+F_Description	fast-lookup.cpp	/^    enum { F_EquityName=0, F_Description, F_MarketCap, F_Price, F_PE_ratio, F_COUNT };$/;"	e	enum:EquityTextFactory::__anon1	file:
+F_EquityName	fast-lookup.cpp	/^    enum { F_EquityName=0, F_Description, F_MarketCap, F_Price, F_PE_ratio, F_COUNT };$/;"	e	enum:EquityTextFactory::__anon1	file:
+F_MarketCap	fast-lookup.cpp	/^    enum { F_EquityName=0, F_Description, F_MarketCap, F_Price, F_PE_ratio, F_COUNT };$/;"	e	enum:EquityTextFactory::__anon1	file:
+F_PE_ratio	fast-lookup.cpp	/^    enum { F_EquityName=0, F_Description, F_MarketCap, F_Price, F_PE_ratio, F_COUNT };$/;"	e	enum:EquityTextFactory::__anon1	file:
+F_Price	fast-lookup.cpp	/^    enum { F_EquityName=0, F_Description, F_MarketCap, F_Price, F_PE_ratio, F_COUNT };$/;"	e	enum:EquityTextFactory::__anon1	file:
+FindByEquityName	fast-lookup.cpp	/^    const Equity& FindByEquityName(const char* name) const {$/;"	f	class:EquityMap
+GetDescription	fast-lookup.cpp	/^    const string & GetDescription() const {$/;"	f	class:Equity
+GetEquityName	fast-lookup.cpp	/^    const string & GetEquityName() const {$/;"	f	class:Equity
+GetMarketCap	fast-lookup.cpp	/^    long long GetMarketCap() const {$/;"	f	class:Equity
+GetPE_ratio	fast-lookup.cpp	/^    double GetPE_ratio() const {$/;"	f	class:Equity
+GetPrice	fast-lookup.cpp	/^    double GetPrice() const {$/;"	f	class:Equity
+Insert	fast-lookup.cpp	/^    void Insert( std::stringstream& ss, char delimiter ) {$/;"	f	class:StringSplitter
+Insert	fast-lookup.cpp	/^    void Insert(const Equity& e) {$/;"	f	class:EquityMap
+MapT	fast-lookup.cpp	/^    typedef std::set<Equity> MapT;$/;"	t	class:EquityMap	file:
+ParseArgs	fast-lookup.cpp	/^    ParseArgs(int argc, char* argv[]) :$/;"	f	class:ParseArgs
+ParseArgs	fast-lookup.cpp	/^class ParseArgs {$/;"	c	file:
+ParseEquity	fast-lookup.cpp	/^    EquityPtr ParseEquity(const char* inputString) {$/;"	f	class:EquityTextFactory
+ParseEquity	fast-lookup.cpp	/^    bool ParseEquity(const char* inputString, \/*out*\/ Equity& result) {$/;"	f	class:EquityTextFactory	file:
+ParseString	fast-lookup.cpp	/^    ParseString(const string& input, double & target) : _Ok(false) {$/;"	f	class:ParseString
+ParseString	fast-lookup.cpp	/^    ParseString(const string& input, long long& target) : _Ok(false) {$/;"	f	class:ParseString
+ParseString	fast-lookup.cpp	/^class ParseString {$/;"	c	file:
+RunUnitTests	fast-lookup.cpp	/^    bool RunUnitTests;$/;"	m	class:ParseArgs	file:
+StringSplitter	fast-lookup.cpp	/^    StringSplitter(const char* text, char delimiter) {$/;"	f	class:StringSplitter
+StringSplitter	fast-lookup.cpp	/^    StringSplitter(const std::string& text, char delimiter) {$/;"	f	class:StringSplitter
+StringSplitter	fast-lookup.cpp	/^class StringSplitter : public std::vector<string> {$/;"	c	file:
+_COMPILE_UNIT_TESTS	fast-lookup.cpp	404;"	d	file:
+_Description	fast-lookup.cpp	/^    string      _Description;$/;"	m	class:Equity	file:
+_EquityName	fast-lookup.cpp	/^    string      _EquityName;$/;"	m	class:Equity	file:
+_Map	fast-lookup.cpp	/^    EquityMap _Map;$/;"	m	class:EquityService	file:
+_Map	fast-lookup.cpp	/^    MapT _Map;$/;"	m	class:EquityMap	file:
+_MarketCap	fast-lookup.cpp	/^    long long   _MarketCap;$/;"	m	class:Equity	file:
+_Ok	fast-lookup.cpp	/^    bool _Ok;$/;"	m	class:ParseString	file:
+_PE_ratio	fast-lookup.cpp	/^    double      _PE_ratio;$/;"	m	class:Equity	file:
+_Price	fast-lookup.cpp	/^    double      _Price;$/;"	m	class:Equity	file:
+allSecurityCodes	fast-lookup.cpp	/^    std::string allSecurityCodes() const {$/;"	f	class:EquityService
+begin	fast-lookup.cpp	/^    const_iterator begin() const {$/;"	f	class:EquityMap
+const_iterator	fast-lookup.cpp	/^    typedef MapT::const_iterator const_iterator;$/;"	t	class:EquityMap	file:
+end	fast-lookup.cpp	/^    const_iterator end() const {$/;"	f	class:EquityMap
+errExit	test	/^function errExit {$/;"	f
+getSecurityInfo	fast-lookup.cpp	/^    EquityPtr getSecurityInfo(const char* equityName) {$/;"	f	class:EquityService
+initialize	fast-lookup.cpp	/^    void initialize(std::istream& input=std::cin) {$/;"	f	class:EquityService
+main	fast-lookup.cpp	/^int main(int argc, char* argv[]) {$/;"	f
+match	fast-lookup.cpp	/^    bool match( const char* left, const char* right) const {$/;"	f	class:ParseArgs
+operator <	fast-lookup.cpp	/^bool operator < (const Equity& left, const Equity& right) {$/;"	f
+operator <<	fast-lookup.cpp	/^std::ostream& operator << (std::ostream& output, const Equity& val) {$/;"	f
+operator bool	fast-lookup.cpp	/^    operator bool() const {$/;"	f	class:ParseString
+parse_EquityName	fast-lookup.cpp	/^    bool parse_EquityName( const string& rawField, string& target ) {$/;"	f	class:EquityTextFactory	file:
+printBadRecordMsg	fast-lookup.cpp	/^    void printBadRecordMsg() const {$/;"	f	class:EquityTextFactory	file:
+test_EquityParser	fast-lookup.cpp	/^    test_EquityParser() {$/;"	f	class:test_EquityParser
+test_EquityParser	fast-lookup.cpp	/^class test_EquityParser {$/;"	c	file:
+test_EquityService	fast-lookup.cpp	/^    test_EquityService() {$/;"	f	class:test_EquityService
+test_EquityService	fast-lookup.cpp	/^class test_EquityService {$/;"	c	file:
+~EquityMap	fast-lookup.cpp	/^    virtual ~EquityMap() {$/;"	f	class:EquityMap
+tags
