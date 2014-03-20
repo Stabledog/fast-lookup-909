@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <tr1/memory>
-#include <regex>
+#include <cstring>
 
 using std::cout;
 using std::string;
@@ -94,7 +94,7 @@ public:
 
 
 // ParseString offers a few conversion functions which return false if
-// 'input' doesn't look validate for the 'target' type.  Otherwise, the string
+// 'input' doesn't validate for the 'target' type.  Otherwise, the string
 // is converted and target is updated.
 class ParseString {
 public:
@@ -135,6 +135,18 @@ private:
 };
 
 
+//  Prints an Equity object to a stream:
+std::ostream& operator << (std::ostream& output, const Equity& val) {
+    output 
+        << "code: " << val.GetEquityName() 
+        << " description: " << val.GetDescription() 
+        << " last price: " << val.GetPrice() 
+        << " market cap: " << val.GetMarketCap()  << " Million "
+        << " P/E: " << val.GetPE_ratio()
+        ;
+}
+
+
 // This class creates Equity objects by parsing a line of text formatted as
 // follows:
 //
@@ -146,8 +158,6 @@ class EquityTextFactory {
 public:
     typedef shared_ptr<Equity> EquityPtr;
 
-    EquityTextFactory() : _EquityNameRegex("[0-9A-Z]+") {
-    }
 
     // Our field schema:
     enum { F_EquityName=0, F_Description, F_MarketCap, F_Price, F_PE_ratio, F_COUNT };
@@ -164,8 +174,6 @@ public:
     }
 
 private:
-    // _EquityNameRegex is used to validate the EquityName field.
-    std::regex _EquityNameRegex;
 
 
     void printBadRecordMsg() const {
@@ -179,12 +187,19 @@ private:
 
         const size_t EquityName_MaxLen=6;
 
-        if ( ! std::regex_match( rawField, _EquityNameRegex)) {
+        // Check the character set:
+        if ( rawField.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") != std::string::npos) {
             return false;
         }
 
-        if ( rawField.size() > EquityName_MaxLen )
+        if ( 
+               (rawField.size() < 1) ||   // Bounds-check the length.
+               ( rawField.size() > EquityName_MaxLen )
+           )
             return false; 
+
+        // Having passed validation, now we can assign the result:
+        target=rawField;
 
         return true;
 
@@ -229,14 +244,60 @@ private:
             printBadRecordMsg();
             return false;
         }
-
+        return true;
     }
 };
 
+#define _COMPILE_UNIT_TESTS
+#ifdef _COMPILE_UNIT_TESTS
 
+class test_EquityParser {
+public:
+    test_EquityParser() {
+        EquityTextFactory fact_00;
+        {
+            EquityTextFactory::EquityPtr ptr=fact_00.ParseEquity("IBMUS|International Business Machines|198657057012|182.95|11.18");
+            std::cerr <<  *ptr;
+        }
+    }
+};
+
+#endif
+
+// Our command-args parser:
+class ParseArgs {
+public:
+    ParseArgs(int argc, char* argv[]) :
+        RunUnitTests(false) {
+            for (int i = 1; i < argc ; ++i) {
+                if ( match(argv[i], "-t" )) {
+                    RunUnitTests=true;
+                }
+                else {
+                    std::cerr << "Unknown argument: " << argv[i] << std::endl;
+                }
+            }
+        }
+
+    bool RunUnitTests;
+    bool match( const char* left, const char* right) const {
+        if (!left || !right) {
+            return false;
+        }
+        return strcmp(left,right)==0;
+    }
+};
 
 int main(int argc, char* argv[]) {
     // main() is our test driver:
+    //  
+    //  Args:  -t:  Run unit tests.
     //
-    cout << "Hello world" << std::endl;
+    
+    ParseArgs args(argc,argv);
+
+    if ( args.RunUnitTests ) {
+        test_EquityParser test_00;
+    }
+    
 }
