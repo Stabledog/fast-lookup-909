@@ -6,6 +6,8 @@
 #include <sstream>
 #include <tr1/memory>
 #include <cstring>
+#include <iomanip>
+#include <set>
 
 using std::cout;
 using std::string;
@@ -35,7 +37,8 @@ public:
     }
 
     // Default constructor zeroes out the POD fields only:
-    Equity() :
+    Equity(const char* equityName=NULL) :
+        _EquityName(equityName),
         _MarketCap(0),
         _Price(0),
         _PE_ratio(0) {
@@ -74,6 +77,57 @@ private:
     double      _PE_ratio;
 
     friend class EquityTextFactory;
+
+};
+
+typedef shared_ptr<Equity> EquityPtr;
+
+// We compare Equity instances by comparing their symbol/name, as the primary key:
+bool operator < (const Equity& left, const Equity& right) {
+    return left.GetEquityName() < right.GetEquityName();
+}
+
+
+// The EquityMap class is an associative array which provides a fast-lookup container
+// for Equity objects:
+class EquityMap {
+public:
+    EquityMap() {
+    }
+
+    virtual ~EquityMap() {
+    }
+
+    typedef std::set<Equity> MapT;
+    typedef MapT::const_iterator const_iterator;
+    const_iterator begin() const {
+        return _Map.begin();
+    }
+    const_iterator end() const {
+        return _Map.end();
+    }
+
+    void Insert(const Equity& e) {
+        _Map.insert(e);
+    }
+
+    // Finds an Equity object by name.  Throws a domain_error if not found.
+    const Equity& FindByEquityName(const char* name) const {
+        MapT::const_iterator it=_Map.find(name);
+        if (it==_Map.end()) {
+            throw new std::domain_error("No such equity name");
+        }
+        return *it;
+    }
+
+private:
+    // We really don't want people accidentally copying this.  It's expensive.  If that operation
+    // is needed, we'll add a Clone() method.
+    EquityMap(const EquityMap& );
+    void operator = (const EquityMap&);
+
+    MapT _Map;
+
 
 };
 
@@ -137,11 +191,12 @@ private:
 
 //  Prints an Equity object to a stream:
 std::ostream& operator << (std::ostream& output, const Equity& val) {
+    double cap=(double)val.GetMarketCap()/(double)1000000.0;
     output
             << "code: " << val.GetEquityName()
             << " description: " << val.GetDescription()
             << " last price: " << val.GetPrice()
-            << " market cap: " << val.GetMarketCap()  << " Million "
+            << " market cap: " << std::fixed << std::setprecision(3) << cap << " Million "
             << " P/E: " << val.GetPE_ratio()
             ;
 }
@@ -156,7 +211,6 @@ std::ostream& operator << (std::ostream& output, const Equity& val) {
 //
 class EquityTextFactory {
 public:
-    typedef shared_ptr<Equity> EquityPtr;
 
 
     // Our field schema:
@@ -248,7 +302,96 @@ private:
     }
 };
 
-#define _COMPILE_UNIT_TESTS
+
+// Given an input stream or filename, this class parses the stream and fills
+// the caller's EquityMap with Equity objects.   If a record error occurs, we
+// just print an error and skip it.  For other errors, we throw std::runtime_error
+//
+class EquityLoader {
+public:
+    EquityLoader( std::istream& input, EquityMap& output ) {
+
+        EquityTextFactory fact;
+
+        // Loop the input stream until end-of-file: 
+        while ( ! input.eofbit ) {
+            string line;
+
+            // Read a line of input:
+            std::getline( input , line );
+            if ( input.failbit || input.badbit ) {
+                throw new std::runtime_error("Input stream failure");
+            }
+
+            Equity newEquity;
+            // Parse this record:
+            if (! fact.ParseEquity( line.c_str() )) {
+                // If parse failed, keep going...
+                continue;
+
+            }
+            
+            // Save our new Equity object in the caller's collection:
+            output.Insert(newEquity);
+
+        }
+
+    }
+};
+
+// EquityService owns the EquityMap and provides application-level query
+// interfaces.
+//
+class EquityService {
+public:
+    EquityService() {
+    }
+
+    // initialize() loads all security data from stdin, filling _Map:
+    void initialize() {
+        try {
+            EquityLoader( std::cin, _Map);
+           }
+        catch (...) {
+            std::cerr << "EquityService.initialize() failed" << std::endl;
+        }
+    }
+
+    // Returns an EquityPtr containing attributes of the given equity.  EquityPtr
+    // will be null if equityName not found.
+    EquityPtr getSecurityInfo(const char* equityName) {
+
+        try {
+            return EquityPtr( new Equity(_Map.FindByEquityName(equityName)));
+        }
+        catch (std::exception e) {
+            std::cerr << e.what() << std::endl;
+        }
+        return EquityPtr(); 
+
+    }
+
+    // Returns all security names, ordered alphabetically:
+    std::string allSecurityCodes() const {
+        
+        // Our Map stores its elements indexed by equity name, and the 
+        // underlying comparison operator uses the std::string operator '<'.
+        // So all we have to do is build a string with each equity name:
+
+        std::stringstream ss;
+        EquityMap::const_iterator it=_Map.begin();
+        while (it != _Map.end()) {
+            ss << it->GetEquityName() << " ";
+        }
+        return ss.str();
+    }
+
+private:
+    EquityMap _Map;
+};
+
+
+//#define _COMPILE_UNIT_TESTS
 #ifdef _COMPILE_UNIT_TESTS
 
 class test_EquityParser {
@@ -257,7 +400,7 @@ public:
         EquityTextFactory fact_00;
         {
             EquityTextFactory::EquityPtr ptr=fact_00.ParseEquity("IBMUS|International Business Machines|198657057012|182.95|11.18");
-            std::cerr <<  *ptr;
+            std::cerr <<  *ptr << std::endl;
         }
     }
 };
@@ -296,8 +439,10 @@ int main(int argc, char* argv[]) {
 
     ParseArgs args(argc,argv);
 
+    #ifdef _COMPILE_UNIT_TESTS
     if ( args.RunUnitTests ) {
         test_EquityParser test_00;
     }
+    #endif
 
 }
