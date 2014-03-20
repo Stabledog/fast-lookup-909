@@ -313,7 +313,7 @@ public:
 
         EquityTextFactory fact;
 
-        // Loop the input stream until end-of-file: 
+        // Loop the input stream until end-of-file:
         while ( ! input.eofbit ) {
             string line;
 
@@ -330,7 +330,7 @@ public:
                 continue;
 
             }
-            
+
             // Save our new Equity object in the caller's collection:
             output.Insert(newEquity);
 
@@ -351,7 +351,7 @@ public:
     void initialize() {
         try {
             EquityLoader( std::cin, _Map);
-           }
+        }
         catch (...) {
             std::cerr << "EquityService.initialize() failed" << std::endl;
         }
@@ -367,14 +367,14 @@ public:
         catch (std::exception e) {
             std::cerr << e.what() << std::endl;
         }
-        return EquityPtr(); 
+        return EquityPtr();
 
     }
 
     // Returns all security names, ordered alphabetically:
     std::string allSecurityCodes() const {
-        
-        // Our Map stores its elements indexed by equity name, and the 
+
+        // Our Map stores its elements indexed by equity name, and the
         // underlying comparison operator uses the std::string operator '<'.
         // So all we have to do is build a string with each equity name:
 
@@ -439,10 +439,10 @@ int main(int argc, char* argv[]) {
 
     ParseArgs args(argc,argv);
 
-    #ifdef _COMPILE_UNIT_TESTS
+#ifdef _COMPILE_UNIT_TESTS
     if ( args.RunUnitTests ) {
         test_EquityParser test_00;
     }
-    #endif
+#endif
 
 }
