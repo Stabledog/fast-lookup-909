@@ -8,7 +8,7 @@
 #include <tr1/memory>
 #include <cstring>
 #include <iomanip>
-#include <set>
+#include <map>
 
 using std::cout;
 using std::string;
@@ -95,10 +95,6 @@ struct Stub  {
 
 typedef shared_ptr<Equity> EquityPtr;
 
-// We compare Equity instances by comparing their symbol/name, as the primary key:
-bool operator < (const Equity& left, const Equity& right) {
-    return left.GetEquityName() < right.GetEquityName();
-}
 
 
 // The EquityMap class is an associative array which provides a fast-lookup container
@@ -111,7 +107,7 @@ public:
     virtual ~EquityMap() {
     }
 
-    typedef std::set<Equity> MapT;
+    typedef std::map<string,EquityPtr> MapT;
     typedef MapT::const_iterator const_iterator;
     const_iterator begin() const {
         return _Map.begin();
@@ -120,17 +116,17 @@ public:
         return _Map.end();
     }
 
-    void Insert(const Equity& e) {
-        _Map.insert(e);
+    void Insert(const EquityPtr& e) {
+        _Map[e->GetEquityName()] = e;
     }
 
     // Finds an Equity object by name.  Throws a domain_error if not found.
-    const Equity& FindByEquityName(const char* name) const {
+    EquityPtr  FindByEquityName(const char* name) const {
         MapT::const_iterator it=_Map.find(name);
         if (it==_Map.end()) {
             throw new std::domain_error("No such equity name");
         }
-        return *it;
+        return it->second;
     }
 
 private:
@@ -372,7 +368,7 @@ public:
             }
 
             // Save our new Equity object in the caller's collection:
-            output.Insert(*newEquity);
+            output.Insert(newEquity);
 
             Stub() << "Inserted " << newEquity->GetEquityName() << std::endl;
         }
@@ -403,7 +399,7 @@ public:
     EquityPtr getSecurityInfo(const char* equityName) {
 
         try {
-            return EquityPtr( new Equity(_Map.FindByEquityName(equityName)));
+            return _Map.FindByEquityName(equityName);
         }
         catch (std::exception e) {
             std::cerr << e.what() << std::endl;
@@ -423,7 +419,7 @@ public:
         std::stringstream ss;
         EquityMap::const_iterator it=_Map.begin();
         while (it != _Map.end()) {
-            ss << it->GetEquityName() << "\n";
+            ss << it->first << "\n";
             ++it;
         }
         return ss.str();
