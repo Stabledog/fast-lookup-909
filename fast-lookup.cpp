@@ -212,18 +212,18 @@ public:
 
 };
 
-// Trim leading whitespace from a string.  
+// Trim leading whitespace from a string.
 //   Usage:
 //      string newStr =  LTrim(old_string);
 //
 struct LTrim {
     LTrim(const string& orig) {
         size_t ix=orig.find_first_not_of(" \t\n\r\b");
-        if (ix==string::npos) 
+        if (ix==string::npos)
             _Result=orig;
         else
             _Result=orig.substr(ix);
-        
+
     }
     string _Result;
     operator const string&() const {
@@ -438,7 +438,7 @@ public:
 
 // Compares two Equity objects, returning the one with the lowest P/E.  If
 // the objects have the same P/E, it returns the one with the lowest price.
-class LowestPE_filter : public EquityFilter{
+class LowestPE_filter : public EquityFilter {
     const Equity& Compare(const Equity& left, const Equity& right) const {
         double l_pe=left.GetPE_ratio(),
                r_pe=right.GetPE_ratio();
@@ -529,7 +529,7 @@ public:
     string lowestPE() const {
         const EquityPtr result=_Map.FindByCompareFilter(  LowestPE_filter() );
         if (result) {
-           return result->GetEquityName();
+            return result->GetEquityName();
         }
         return "";
     }
@@ -573,7 +573,7 @@ public:
             throw std::runtime_error("Can't open input000.txt");
         }
         const int input000_record_count=17;
-        srv.initialize(test_input); 
+        srv.initialize(test_input);
 
         {
             // Select all the equities in given range:
@@ -598,7 +598,7 @@ public:
             StringSplitter sp( allCodes, '\n');
             if (sp.size() != input000_record_count)
                 throw std::runtime_error("Invalid record count for allSecurityCodes()");
-        
+
         }
         {
             // Find the lowest P/E:
@@ -654,22 +654,22 @@ int main(int argc, char* argv[]) {
         throw std::runtime_error( "Unit tests are not enabled for this build." );
 #endif
     }
-    else 
-    { // Main line logic:
+    else
+    {   // Main line logic:
         try {
             EquityService srv;
             std::ifstream inputFile( args.InputFile.length() ? args.InputFile : "/dev/zero");
 
             // We'll either use stdin or the input file, if the latter was specified:
             std::istream & input( args.InputFile.length() ? inputFile :  std::cin );
-            
+
             // Load from stdin to EquityService:
             bool ok=srv.initialize( input );
             if (!ok) {
                 std::cerr << "EquityService.initialize() failed" << std::endl;
                 return 1;
             }
-            
+
             // Print out these securities:
             const char* printItems[] = {"IBMUS","AAPLUS", "AALLN", "30HK"};
             for (int i = 0; i < sizeof(printItems)/sizeof(*printItems); ++i) {
@@ -706,7 +706,7 @@ int main(int argc, char* argv[]) {
 
                 }
             }
-            
+
         }
         catch (std::exception e) {
             std::cerr << e.what() << std::endl;
