@@ -1,0 +1,41 @@
+Lookup for Code IBMUS
+code: IBMUS description: International Business Machines last price: 182.950 market cap: 198657.057 Million  P/E: 11.180
+Lookup for Code AAPLUS
+code: AAPLUS description: Apple Inc last price: 537.370 market cap: 479328.136 Million  P/E: 13.320
+Lookup for Code AALLN
+code: AALLN description: ANGLO AMERICAN PLC last price: 1589.000 market cap: 22153.061 Million  P/E: 0.100
+Lookup for Code 30HK
+code: 30HK description: ABC COMMUNICATIONS HLDGS LTD last price: 0.158 market cap: 261.545 Million  P/E: 0.110
+All codes:
+1398HK
+30HK
+5HK
+857HK
+941HK
+AALLN
+AAPLUS
+CVXUS
+GEUS
+IBMUS
+JNJUS
+JPMUS
+MSFTUS
+PFEUS
+PGUS
+WMTUS
+XOMUS
+
+Lowest P/E is 0.100 from code AALLN
+Get equity objects whose P/E is between 6 and 15
+The following have P/E between 6.000 and 15.000
+code: 5HK description: HSBC HLDGS PLC last price: 84.850 market cap: 1597769.646 Million  P/E: 12.240
+code: 857HK description: PETROCHINA CO-H last price: 7.950 market cap: 1744803.856 Million  P/E: 9.560
+code: 941HK description: CHINA MOBILE last price: 73.700 market cap: 1482285.122 Million  P/E: 8.910
+code: AAPLUS description: Apple Inc last price: 537.370 market cap: 479328.136 Million  P/E: 13.320
+code: CVXUS description: CHEVRON CORP last price: 112.710 market cap: 220837.954 Million  P/E: 10.289
+code: IBMUS description: International Business Machines last price: 182.950 market cap: 198657.057 Million  P/E: 11.180
+code: JPMUS description: JPMORGAN CHASE last price: 58.490 market cap: 217192.350 Million  P/E: 8.420
+code: MSFTUS description: MICROSOFT CORP last price: 37.420 market cap: 312081.482 Million  P/E: 13.205
+code: PFEUS description: PFIZER INC last price: 31.880 market cap: 204834.243 Million  P/E: 14.088
+code: WMTUS description: WAL-MART STORES last price: 75.330 market cap: 241582.768 Million  P/E: 14.400
+code: XOMUS description: EXXON MOBIL CORP last price: 94.070 market cap: 413785.620 Million  P/E: 12.830

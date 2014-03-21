@@ -95,10 +95,13 @@ struct Stub  {
 
 typedef shared_ptr<Equity> EquityPtr;
 
-// Base class for Equity filters.
+// Base class for Equity filter functor types.
 struct EquityFilter {
     virtual const Equity& Compare(const Equity& left, const Equity& right) const {
         return left;
+    }
+    virtual bool Select(const Equity& elem) const {
+        return false;
     }
 };
 
@@ -133,6 +136,24 @@ public:
             throw new std::domain_error("No such equity name");
         }
         return it->second;
+    }
+
+    // Iteratively invokes a selection filter on each element in the collection to
+    // produce a selected-items collection.  Returns number of elements added
+    // to the 'result' collection.
+    int SelectByFilter( const EquityFilter& filter, EquityMap & result) const {
+        // If the map is empty, return an empty pointer:
+        if ( _Map.size()== 0)
+            return 0;
+
+        int nAdded=0;
+        for (const_iterator it= begin(); it !=end(); ++it) {
+            if (filter.Select(*it->second)) {
+                ++nAdded;
+                result.Insert(it->second);
+            }
+        }
+        return nAdded;
     }
 
     // Iteratively compares each element in the collection using a caller-supplied
@@ -387,18 +408,28 @@ public:
         // Loop the input stream until end-of-file:
         string line;
 
-        while ( std::getline(input, line) ) {
-            EquityPtr newEquity=fact.ParseEquity( line.c_str() );
-            if (!newEquity) {
-                // If parse failed, keep going...
-                continue;
+        try {
+            while ( std::getline(input, line) ) {
+                try {
+                    EquityPtr newEquity=fact.ParseEquity( line.c_str() );
+                    if (!newEquity) {
+                        // If parse failed, keep going...
+                        continue;
 
+                    }
+
+                    // Save our new Equity object in the caller's collection:
+                    output.Insert(newEquity);
+
+                    Stub() << "Inserted " << newEquity->GetEquityName() << std::endl;
+                }
+                catch (std::exception e) {
+                    std::cerr << e.what() << std::endl;
+                }
             }
-
-            // Save our new Equity object in the caller's collection:
-            output.Insert(newEquity);
-
-            Stub() << "Inserted " << newEquity->GetEquityName() << std::endl;
+        }
+        catch (std::exception e) {
+            std::cerr << e.what() << std::endl;
         }
 
     }
@@ -424,6 +455,25 @@ class LowestPE_filter : public EquityFilter{
     }
 };
 
+// Selects Equity objects by comparing their P/E ratio to a caller-defined [min,max] range.
+class PE_RangeFilter : public EquityFilter {
+public:
+    PE_RangeFilter( double minPE, double maxPE ): _minPE(minPE),_maxPE(maxPE) {
+    }
+
+    bool Select( const Equity& elem ) const {
+        double pe=elem.GetPE_ratio();
+        if ((pe < _minPE) || (pe > _maxPE))
+            return false;
+        return true;
+    }
+
+private:
+    double _minPE;
+    double _maxPE;
+
+};
+
 // EquityService owns the EquityMap and provides application-level query
 // interfaces.
 //
@@ -433,13 +483,15 @@ public:
     }
 
     // initialize() loads all security data from stdin, filling _Map:
-    void initialize(std::istream& input=std::cin) {
+    bool initialize(std::istream& input=std::cin) {
         try {
             EquityLoader( input, _Map);
         }
         catch (...) {
             std::cerr << "EquityService.initialize() failed" << std::endl;
+            return false;
         }
+        return true;
     }
 
     // Returns an EquityPtr containing attributes of the given equity.  EquityPtr
@@ -482,6 +534,12 @@ public:
         return "";
     }
 
+    // Returns the number of Equity objects whose P/E values are in the range specified,
+    // adding them to caller's collection.
+    int getPERange( double min_pe, double max_pe, EquityMap& result ) const {
+        return _Map.SelectByFilter( PE_RangeFilter( min_pe, max_pe), result  );
+    }
+
 private:
     EquityMap _Map;
 };
@@ -516,6 +574,15 @@ public:
         }
         const int input000_record_count=17;
         srv.initialize(test_input); 
+
+        {
+            // Select all the equities in given range:
+            EquityMap selected;
+            int count=srv.getPERange( 6.0, 15.0, selected );
+            if (count != 11) {
+                throw std::runtime_error("Incorrect number of P/E-range matches");
+            }
+        }
 
         {
             // Make sure we can retrieve a security:
@@ -554,12 +621,15 @@ public:
                 RunUnitTests=true;
             }
             else {
-                std::cerr << "Unknown argument: " << argv[i] << std::endl;
+                // We're expecting an input filename.  If we don't get it, stdin is the default:
+                InputFile=argv[i];
             }
         }
     }
 
     bool RunUnitTests;
+    string InputFile;
+
     bool match( const char* left, const char* right) const {
         if (!left || !right) {
             return false;
@@ -576,11 +646,72 @@ int main(int argc, char* argv[]) {
 
     ParseArgs args(argc,argv);
 
-#ifdef _COMPILE_UNIT_TESTS
     if ( args.RunUnitTests ) {
+#ifdef _COMPILE_UNIT_TESTS
         test_EquityParser test_00;
         test_EquityService test_01;
-    }
+#else
+        throw std::runtime_error( "Unit tests are not enabled for this build." );
 #endif
+    }
+    else 
+    { // Main line logic:
+        try {
+            EquityService srv;
+            std::ifstream inputFile( args.InputFile.length() ? args.InputFile : "/dev/zero");
 
+            // We'll either use stdin or the input file, if the latter was specified:
+            std::istream & input( args.InputFile.length() ? inputFile :  std::cin );
+            
+            // Load from stdin to EquityService:
+            bool ok=srv.initialize( input );
+            if (!ok) {
+                std::cerr << "EquityService.initialize() failed" << std::endl;
+                return 1;
+            }
+            
+            // Print out these securities:
+            const char* printItems[] = {"IBMUS","AAPLUS", "AALLN", "30HK"};
+            for (int i = 0; i < sizeof(printItems)/sizeof(*printItems); ++i) {
+                cout << "Lookup for Code " << printItems[i] << std::endl;
+                EquityPtr e=srv.getSecurityInfo( printItems[i] );
+                cout << *e << std::endl;
+            }
+
+            cout << "All codes:" << std::endl;
+            // Print out all security codes:
+            cout << srv.allSecurityCodes() << std::endl;
+
+            // Print the equity with the lowest P/E:
+            {
+                string lowestPE=srv.lowestPE();
+                EquityPtr eq=srv.getSecurityInfo(lowestPE.c_str());
+                cout << "Lowest P/E is " << std::setprecision(3) << eq->GetPE_ratio() << " from code " << lowestPE << std::endl;
+            }
+
+            {
+                // Fill and print an EquityMap containing the securities whose
+                // P/E is between 6 ands 16:
+                EquityMap selected;
+
+                cout << "Get equity objects whose P/E is between 6 and 15" << std::endl;
+                srv.getPERange(6.0,15.0,selected);
+
+                cout << "The following have P/E between 6.000 and 15.000" << std::endl;
+
+                for (EquityMap::const_iterator it= selected.begin();
+                        it != selected.end();
+                        ++it) {
+                    cout << *it->second << std::endl;
+
+                }
+            }
+            
+        }
+        catch (std::exception e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+    }
+    return 0;
 }

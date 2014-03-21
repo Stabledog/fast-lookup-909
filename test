@@ -10,7 +10,8 @@ while true; do
     make || errExit "Make failed"
 
     echo "Invoking cgdb:"
-    /usr/bin/cgdb -- ./fast-lookup -ex 'b main' -ex 'r  -t'
+    #/usr/bin/cgdb -- ./fast-lookup -ex 'b main' -ex 'r  -t'
+    /usr/bin/cgdb -- ./fast-lookup -ex 'b main' -ex 'r test_cases/input000.txt '
 
     read -p "Hit any key to restart test loop, or Ctrl+C to exit:"
 
